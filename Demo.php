@@ -23,4 +23,14 @@ class Demo
             'message' => $result['message'],
         ], $result['status']);
     }
+
+    public function send1()
+    {
+        $response = $this->smsRepository->send(Sms::fromArray([
+            'phone' => '09300000000',
+            'message' => 'test',
+        ]));
+
+        // Do whatever next
+    }
 }
