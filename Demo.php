@@ -13,24 +13,18 @@ class Demo
     }
 
     /**
-     * @throws Throwable
+     * @param Request $request
+     * @return JsonResponse
      */
     public function send(Request $request): JsonResponse
     {
-        $result = $this->smsRepository->send(Sms::fromRequest($request));
+        $to = $request->get('phone_number');
+        $message = $request->get('message');
+
+        $result = $this->smsRepository->send(new Sms($to, $message));
 
         return response()->json([
             'message' => $result['message'],
         ], $result['status']);
-    }
-
-    public function send1()
-    {
-        $response = $this->smsRepository->send(Sms::fromArray([
-            'phone' => '09300000000',
-            'message' => 'test',
-        ]));
-
-        // Do whatever next
     }
 }
