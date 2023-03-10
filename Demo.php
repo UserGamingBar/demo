@@ -1,33 +1,26 @@
 <?php
 
+
+use DataTransferObjects\Sms;
+use Illuminate\Http\JsonResponse;
+use Interface\TelesignSmsRepositoryInterface;
+use Illuminate\Http\Request;
+
 class Demo
 {
-    /**
-     * @throws Throwable
-     */
-    public function send(): void
+    public function __construct(public TelesignSmsRepositoryInterface $smsRepository)
     {
-        $to = '1234567890';
-        $message = 'New newsletter is available. Please check your email.';
-
-        SmsMessage::make()
-            ->to($to)
-            ->message($message)
-            ->using('telesign')
-            ->send();
     }
 
     /**
      * @throws Throwable
      */
-    public function send1(): void
+    public function send(Request $request): JsonResponse
     {
-        $to = '1234567890';
-        $message = 'New newsletter is available. Please check your email.';
+        $result = $this->smsRepository->send(Sms::fromRequest($request));
 
-        $telesignService = new TelesignService('foo', 'bar', 'google.com');
-
-        $telesignService->send($to, $message);
-
+        return response()->json([
+            'message' => $result['message'],
+        ], $result['status']);
     }
 }

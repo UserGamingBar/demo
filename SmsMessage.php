@@ -5,6 +5,7 @@ use Exceptions\InvalidSmsProviderException;
 use Exceptions\InvalidTelephoneNumberException;
 use Exceptions\TelesignApiErrorException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class SmsMessage
 {
@@ -41,14 +42,26 @@ class SmsMessage
     /**
      * @throws Throwable
      */
-    public function send(): JsonResponse
+    public function send(): array
     {
         throw_if(!in_array($this->provider, ['telesign', 'foo', 'bar']), InvalidSmsProviderException::class);
 
+        match ($this->provider) {
+            'telesign' => $response = $this->sendUsingTelesign(),
+        };
+
+        return $response;
+    }
+
+
+    /**
+     * @throws Throwable
+     * @throws ValidationException
+     */
+    public function sendUsingTelesign(): array
+    {
         try {
-            match ($this->provider) {
-                'telesign' => $response = (new TelesignService('foo', 'bar', 'google.com'))->send($this->to, $this->message),
-            };
+            $response = (new TelesignService('foo', 'bar', 'google.com'))->send($this->to, $this->message);
         } catch (InvalidTelephoneNumberException $exception) {
             throw $exception->validationException();
         } catch (EmptySmsMessageException $exception) {
